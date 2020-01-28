@@ -79,7 +79,7 @@
       
         <li class="list-item">
           
-            <a href="/" class="item-link active">Home</a>
+            <a href="/" class="item-link">Home</a>
           
         </li>
       
@@ -118,7 +118,7 @@
         
           <li class="menu-item">
             
-              <a href="/" class="menu-link mobile-active">Home</a>
+              <a href="/" class="menu-link">Home</a>
             
           </li>
         
@@ -151,65 +151,48 @@
   </div>
 </header>
 
-    <main class="app-body">
+    <div id="article-banner">
+  <h2>Archives</h2>
+  <p class="post-date">文章归档</p>
+</div>
+<main class="app-body" id="archives">
   
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2020/01/19/%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84%E9%82%A3%E4%BA%9B%E4%BA%8B/">内存映射那些事</a>
-      </h2>
-      <p class="article-date">January 19, 2020</p>
-      
-      <div class="article-summary">
-        
-          
-        
+  
+  
+    <section class="time-section">
+  <h1 class="section-year">
+    2020
+  </h1>
+  <div class="section-list">
+    
+    
+      <div class="section-list-item">
+        <a href="/2020/01/19/%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84%E9%82%A3%E4%BA%9B%E4%BA%8B/" class="archive-title">内存映射那些事</a>
+        <p class="archive-date">01-19</p>
       </div>
-      <a class="more" href="/2020/01/19/%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84%E9%82%A3%E4%BA%9B%E4%BA%8B/">Read more</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2020/01/19/%E6%B5%81%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E8%BF%87%E7%A8%8B%E4%B8%AD%E5%88%86%E4%BD%8D%E6%95%B0%E7%9A%84%E8%AE%A1%E7%AE%97%E6%96%B9%E6%B3%95/">流式数据处理过程中分位数的计算方法</a>
-      </h2>
-      <p class="article-date">January 19, 2020</p>
-      
-        
-  <a href="/tags#流式计算" >
-    <span class="tag-code">流式计算</span>
-  </a>
-
-  <a href="/tags#t-digest" >
-    <span class="tag-code">t-digest</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          分位数（quantile）的计算在数据分析、机器学习等场景中应用广泛，例如在程序化的广告预测中，需要计算90%、95%等的分位数对应的预测值，而且不同于离线的批量数据统计，这是实时的流式数据计算。这里介绍t-digest算法，一种高效和高精准的分位数近似算法，它已经应用在ES，Kylin，P ...
-        
+    
+      <div class="section-list-item">
+        <a href="/2020/01/19/%E6%B5%81%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E8%BF%87%E7%A8%8B%E4%B8%AD%E5%88%86%E4%BD%8D%E6%95%B0%E7%9A%84%E8%AE%A1%E7%AE%97%E6%96%B9%E6%B3%95/" class="archive-title">流式数据处理过程中分位数的计算方法</a>
+        <p class="archive-date">01-19</p>
       </div>
-      <a class="more" href="/2020/01/19/%E6%B5%81%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E8%BF%87%E7%A8%8B%E4%B8%AD%E5%88%86%E4%BD%8D%E6%95%B0%E7%9A%84%E8%AE%A1%E7%AE%97%E6%96%B9%E6%B3%95/">Read more</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2020/01/19/hello-world/">Hello World</a>
-      </h2>
-      <p class="article-date">January 19, 2020</p>
-      
-      <div class="article-summary">
-        
-          Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer ...
-        
+    
+      <div class="section-list-item">
+        <a href="/2020/01/19/hello-world/" class="archive-title">Hello World</a>
+        <p class="archive-date">01-19</p>
       </div>
-      <a class="more" href="/2020/01/19/hello-world/">Read more</a>
-    </article>
-  
-
+    
+  </div>
+</section>
   
 </main>
 
-
+<script>
+  (function () {
+    var url = 'https://lukangping.github.io/tags/t-digest/index.html';
+    $('#article-banner').geopattern(url);
+    $('.header').removeClass('fixed-header');
+  })();
+</script>
     <div class="scroll-top">
   <span class="arrow-icon"></span>
 </div>

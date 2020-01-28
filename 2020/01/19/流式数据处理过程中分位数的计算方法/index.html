@@ -162,13 +162,26 @@
   <!-- Article START -->
   <article class="post-article">
     <section class="markdown-content"><p>分位数（quantile）的计算在数据分析、机器学习等场景中应用广泛，例如在程序化的广告预测中，需要计算90%、95%等的分位数对应的预测值，而且不同于离线的批量数据统计，这是实时的流式数据计算。这里介绍t-digest算法，一种高效和高精准的分位数近似算法，它已经应用在ES，Kylin，Pinot等开源系统中。</p>
-<p><em>质心（centroid）</em><br>在具体介绍t-digest算法之前，先引入质心的概念，熟悉k-means聚类算法的同学，一定对选定初始质心，然后计算样本点与质心距离这个过程不陌生。同样，在t-digest中，也使用质心代表一组样本，每一个centroid由样本均值和样本权重(mean, count)组成。全部的数据集或样本，就是由一组质心所组成。<br>[image:A4751567-58D4-4DBF-A7E7-E0413894D91B-83217-00011C580D4BC547/page11image985328.png]<br>可见，这种质心组合的方式一定带来了信息的丢失，如果要计算一个特定的分位数q对应的样本值，可以采用插值（interpolation），类似加权平均的方式来实现，如下图：<br>[image:B0192F64-7224-4412-96BD-5635734F147F-83217-00011CEC6DD2A36D/393C2F8A-0E2B-46E3-85CF-5DFF3266572D.png]</p>
-<p><em>Scale Function</em><br>T-digest算法的一个关键问题是，如何控制质心数量。质心的数量越多，质心的权重越小，信息损失越小，精准度也就越高，但是需要更多的内存和计算时间。同时，在常见的场景中，我们往往更关心的是q=0，q=1附近分位数的计算，也就是期望在头、尾的质心数量越密集。t-digest引入了scale function来很好的实现以上两种需求，达成了准确度和效率的平衡（trade-off）。一个常用的scale function如下：<br>[image:B430B985-62E6-4E4E-B69D-AC074EFD74BF-83217-00011E559E4B5307/85E5E77D-ACCD-47AF-AAD1-B69D8CA3F56A.png]<br>k：分位数q对应质心的编号（notional index）<br>q：要计算的分位数<br>δ ：压缩系数，通常取100<br>如下是函数图像：<br>[image:91433B73-CF84-441D-91F4-108A61E9B1E4-83217-00011EAFEFB549A6/AEE0770B-C5FD-479E-8A06-A267D915F911.png]<br>那么问题来了，为什么用这个scale function，其实t-digest论文有其他alternative的scale function，另外你可以联想logic regression函数，没有绝对的理由，只是满足分布需求即可。</p>
-<p><em>Ser/Deser</em><br>T-digest提供序列化和反序列化的方法，这对我们实际使用帮助很大。在我们项目中，通过flink接收流式数据，并设置countWindow以阶段性记录t-digest结果，这样解决服务发布重启、线上验证等环节上的需要。</p>
+<h3 id="质心（centroid）"><a href="#质心（centroid）" class="headerlink" title="质心（centroid）"></a>质心（centroid）</h3><p>在具体介绍t-digest算法之前，先引入质心的概念，熟悉k-means聚类算法的同学，一定对选定初始质心，然后计算样本点与质心距离这个过程不陌生。同样，在t-digest中，也使用质心代表一组样本，每一个centroid由样本均值和样本权重(mean, count)组成。全部的数据集或样本，就是由一组质心所组成。<br><img src="/images/20200128/01.png" alt="01.png"><br>可见，这种质心组合的方式一定带来了信息的丢失，如果要计算一个特定的分位数q对应的样本值，可以采用插值（interpolation），类似加权平均的方式来实现，如下图：<br><img src="/images/20200128/02.png" alt="02.png"></p>
+<h3 id="Scale-Function"><a href="#Scale-Function" class="headerlink" title="Scale Function"></a>Scale Function</h3><p>t-digest算法的一个关键问题是，如何控制质心数量。质心的数量越多，质心的权重越小，信息损失越小，精准度也就越高，但是需要更多的内存和计算时间。同时，在常见的场景中，我们往往更关心的是q=0，q=1附近分位数的计算，也就是期望在头、尾的质心数量越密集。t-digest引入了scale function来很好的实现以上两种需求，达成了准确度和效率的平衡（trade-off）。一个常用的scale function如下：<br><img src="/images/20200128/03.png" alt="03.png"><br>k：分位数q对应质心的编号（notional index）<br>q：要计算的分位数<br>δ ：压缩系数，通常取100<br>如下是函数图像：<br><img src="/images/20200128/04.png" alt="04.png"><br>那么问题来了，为什么用这个scale function，其实t-digest论文有其他alternative的scale function，另外你可以联想logic regression函数，没有绝对的理由，只是满足分布需求即可。</p>
+<h3 id="Ser-Deser"><a href="#Ser-Deser" class="headerlink" title="Ser/Deser"></a>Ser/Deser</h3><p>t-digest提供序列化和反序列化的方法，这对我们实际使用帮助很大。在我们项目中，通过flink接收流式数据，并设置countWindow以阶段性记录t-digest结果，这样解决服务发布重启、线上验证等环节上的需要。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">public abstract void asBytes(ByteBuffer buf);</span><br><span class="line">public static AVLTreeDigest fromBytes(ByteBuffer buf)</span><br></pre></td></tr></table></figure>
 <p>最后，t-digest提供了如下两种add方法，尤其是第二个算法，用以实现两个t-digest的merge操作，而这也为并行计算提供支持，便于在hadoop、spark等分布式任务系统中得以应用。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**</span><br><span class="line"> * Add a sample to this TDigest.</span><br><span class="line"> * @param x The data value to add</span><br><span class="line"> *&#x2F;</span><br><span class="line">public abstract void add(double x);</span><br><span class="line"></span><br><span class="line">&#x2F;**</span><br><span class="line"> * Add all of the centroids of another TDigest to this one.</span><br><span class="line"> * @param other The other TDigest</span><br><span class="line"> *&#x2F;</span><br><span class="line">public abstract void add(TDigest other);</span><br></pre></td></tr></table></figure></section>
     <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#流式计算" >
+    <span class="tag-code">流式计算</span>
+  </a>
+
+  <a href="/tags#t-digest" >
+    <span class="tag-code">t-digest</span>
+  </a>
+
+      </div>
     
     <!-- Tags END -->
     <!-- NAV START -->
@@ -207,7 +220,7 @@
   <div class="toc-main">
     <strong class="toc-title">Catalog</strong>
     
-      <ol class="nav">none</ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#质心（centroid）"><span class="toc-nav-text">质心（centroid）</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Scale-Function"><span class="toc-nav-text">Scale Function</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Ser-Deser"><span class="toc-nav-text">Ser&#x2F;Deser</span></a></li></ol>
     
   </div>
 </aside>
@@ -264,6 +277,8 @@
     })
   })();
 </script>
+
+
 
 
   <script>
